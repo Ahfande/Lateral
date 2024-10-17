@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESP32 Control</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-top: 50px;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .on {
+        background-color: green;
+        color: white;
+      }
+      .off {
+        background-color: red;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ESP32 Control Panel</h1>
+    <button id="controlBtn" class="off" onclick="toggleState()">OFF</button>
+
+    <!-- Firebase SDK -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script> -->
+    
+    <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyDh7h2pepjv8AIPwVKy30y2tQIkKwNOcmU",
+        authDomain: "salmon-17.firebaseapp.com",
+        databaseURL: "https://salmon-17-default-rtdb.firebaseio.com",
+        projectId: "salmon-17",
+        storageBucket: "salmon-17.appspot.com",
+        messagingSenderId: "809053328128",
+        appId: "1:809053328128:web:446c479d6563c5da1c59e5",
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // Reference to the Firebase database
+      var database = firebase.database();
+
+      // Initial state
+      let isOn = false;
+
+      // Function to toggle the button state
+      function toggleState() {
+        isOn = !isOn;
+        document.getElementById("controlBtn").innerHTML = isOn ? "ON" : "OFF";
+        document.getElementById("controlBtn").className = isOn ? "on" : "off";
+
+        // Update Firebase with the new state
+        database.ref("/device/state").set(isOn ? "ON" : "OFF");
+      }
+
+      // Listen for changes in Firebase to update button state
+      database.ref("/device/state").on("value", function (snapshot) {
+        let state = snapshot.val();
+        if (state === "ON") {
+          document.getElementById("controlBtn").innerHTML = "ON";
+          document.getElementById("controlBtn").className = "on";
+          isOn = true;
+        } else {
+          document.getElementById("controlBtn").innerHTML = "OFF";
+          document.getElementById("controlBtn").className = "off";
+          isOn = false;
+        }
+      });
+    </script>
+  </body>
+</html>

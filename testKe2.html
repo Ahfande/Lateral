@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 LED Timer Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input {
+            padding: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .on {
+            background-color: green;
+            color: white;
+        }
+        .off {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ESP32 LED Timer Control</h1>
+    
+    <label for="timeInput">Set Time (in seconds):</label>
+    <input type="number" id="timeInput" placeholder="Enter seconds">
+    <button id="startTimerBtn" onclick="startTimer()">Set Timer</button>
+
+    <h2>LED Status: <span id="ledStatus">OFF</span></h2>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDh7h2pepjv8AIPwVKy30y2tQIkKwNOcmU",
+            authDomain: "salmon-17.firebaseapp.com",
+            databaseURL: "https://salmon-17-default-rtdb.firebaseio.com",
+            projectId: "salmon-17",
+            storageBucket: "salmon-17.appspot.com",
+            messagingSenderId: "809053328128",
+            appId: "1:809053328128:web:446c479d6563c5da1c59e5",
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Reference to the Firebase database
+        var database = firebase.database();
+
+        let isOn = false;
+
+        // Function to start the timer and set the LED status
+        function startTimer() {
+            const timeInput = document.getElementById('timeInput').value;
+
+            if (timeInput > 0) {
+                // Convert seconds to milliseconds
+                const timeInMilliseconds = timeInput * 1000;
+
+                // Set LED to OFF initially
+                updateLEDStatus("OFF");
+
+                // Set a timer to turn ON the LED after the specified time
+                setTimeout(() => {
+                    updateLEDStatus("ON");
+                }, timeInMilliseconds);
+            } else {
+                alert("Please enter a valid time in seconds.");
+            }
+        }
+
+        // Function to update the LED status in Firebase and on the web page
+        function updateLEDStatus(status) {
+            isOn = (status === "ON");
+            document.getElementById("ledStatus").innerText = status;
+
+            // Update Firebase with the new LED status
+            database.ref("/device/ledStatus").set(status);
+        }
+
+        // Listen for changes in Firebase to update the LED status in real-time
+        database.ref("/device/ledStatus").on("value", function(snapshot) {
+            let status = snapshot.val();
+            document.getElementById("ledStatus").innerText = status;
+        });
+    </script>
+
+</body>
+</html>
